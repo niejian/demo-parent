@@ -1,0 +1,6 @@
+server:
+  port: 7001
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.didispace.com/eureka/ # 使用外网注册中心

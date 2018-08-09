@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.demo.user.dao.mapper.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.demo.user.dao.entity.User">
+        <id column="user_id" property="userId" />
+        <result column="user_name" property="userName" />
+        <result column="user_code" property="userCode" />
+        <result column="user_email" property="userEmail" />
+        <result column="nick_name" property="nickName" />
+        <result column="user_img" property="userImg" />
+        <result column="create_date" property="createDate" />
+        <result column="update_date" property="updateDate" />
+    </resultMap>
+
+</mapper>
