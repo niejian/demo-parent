@@ -4,3 +4,20 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka.didispace.com/eureka/ # 使用外网注册中心
+
+spring:
+  application:
+    name: api-gateway
+#feign的调用超时设置
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+zuul:
+  routes:
+    #api模块
+    user-api:
+      path: /demo-user-api/**
+      serviceId: demo-user-service
+    product-api:
+      path: /demo-product-api/**
+      serviceId: demo-product-service
