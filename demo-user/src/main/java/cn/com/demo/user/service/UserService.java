@@ -12,5 +12,13 @@ import com.baomidou.mybatisplus.service.IService;
  * @since 2018-08-08
  */
 public interface UserService extends IService<User> {
+    User getUserById(String id);
+
+    /**
+     * 更新缓存需要返回最新的对象，缓存会将返回值缓存起来
+     * @param user
+     * @return
+     */
+    User updateUser(User user);
 
 }

@@ -14,6 +14,7 @@
         <module>demo-user</module>
         <module>demo-product</module>
         <module>demo-auth</module>
+        <module>demo-cache</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -42,6 +42,11 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
 spring:
+  redis:
+    database: 1
+    host: yun1
+    port: 6379
+
   application:
     name: demo-user-service # 命名应当使用-来分割。否则eureka无法识别
 #feign的调用超时设置
