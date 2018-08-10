@@ -17,8 +17,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -37,13 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-
-//    public SecurityConfig( UserDetailsService userDetailsService) {
-//        //this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-//        this.userDetailsService = userDetailsService;
-//    }
-
-
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
 
@@ -59,7 +50,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //禁用 csrf
         http.cors().and().csrf().disable().authorizeRequests()
                 //允许以下请求
-                .antMatchers("/hello").permitAll()
                 .antMatchers("/login/**").permitAll()
                 // 所有请求需要身份认证
                 .anyRequest().authenticated()

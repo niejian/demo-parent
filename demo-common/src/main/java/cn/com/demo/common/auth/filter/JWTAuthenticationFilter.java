@@ -41,7 +41,9 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
 
         //判断是否有token
         if (authentication == null) {
+            response.getWriter().print("无权限访问，请先登录");
             chain.doFilter(request, response);
+
             return;
         }
 

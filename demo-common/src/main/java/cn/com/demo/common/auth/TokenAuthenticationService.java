@@ -79,10 +79,18 @@ public class TokenAuthenticationService {
 
         }
 
+        //在JWT的playload中，包含了token的过期时间、权限等信息。如果token过期在parseClaimsJws方法会抛出 ExpiredJwtException
 
-        Claims claims = Jwts.parser().setSigningKey(SECRET)
-                .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                .getBody();
+        Claims claims = null;
+        try {
+            claims = Jwts.parser().setSigningKey(SECRET)
+                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                    .getBody();
+        } catch (Exception e) {
+            return null;
+        }
+
+
 
         String auth = (String)claims.get(AUTHORITIES);
 

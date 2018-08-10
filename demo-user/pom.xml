@@ -25,10 +25,7 @@
             <version>${eureka.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus -->
         <dependency>

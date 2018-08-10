@@ -1,6 +1,6 @@
 package cn.com.demo.product.service;
 
-import cn.com.demo.product.dao.entity.Product;
+import cn.com.demo.product.dao.entity.ProductItems;
 import com.baomidou.mybatisplus.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.service.IService;
  * @author code4fun
  * @since 2018-08-10
  */
-public interface ProductService extends IService<Product> {
+public interface ProductItemsService extends IService<ProductItems> {
 
 }
