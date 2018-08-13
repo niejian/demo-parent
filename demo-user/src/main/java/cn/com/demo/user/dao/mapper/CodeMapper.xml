@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.demo.user.dao.mapper.CodeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.demo.user.dao.entity.Code">
+        <id column="id" property="id" />
+        <result column="code_type" property="codeType" />
+        <result column="code_suffix" property="codeSuffix" />
+        <result column="num_int" property="numInt" />
+        <result column="table_ref" property="tableRef" />
+        <result column="code_prefix" property="codePrefix" />
+        <result column="code_middle" property="codeMiddle" />
+        <result column="create_date" property="createDate" />
+        <result column="create_by" property="createBy" />
+        <result column="last_update_date" property="lastUpdateDate" />
+        <result column="last_update_by" property="lastUpdateBy" />
+    </resultMap>
+
+</mapper>

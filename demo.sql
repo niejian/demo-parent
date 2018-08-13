@@ -63,6 +63,21 @@ create table demo_attachment_info(
 	attachment_status tinyint(1) default 1 comment '是否有效；1有效；0无效'
 )ENGINE=InnoDB comment '附件信息' DEFAULT CHARSET=utf8;
 
+create table if exists demo_code;
+create table demo_code(
+  id int(11) primary key auto_increment,
+  code_type varchar (32) default null ,
+  code_suffix varchar(16) not null comment '编码后缀',
+  num_int int(11) default 1 comment '编码',
+  table_ref varchar(16) not null comment '属于哪个表',
+  code_prefix varchar(8) not null comment '编码前缀',
+  code_middle varchar(32) not null comment '编码中段',
+  create_date datetime default null,
+	create_by varchar(16) default '',
+	last_update_date datetime default null,
+	last_update_by varchar(16)
+
+)ENGINE=InnoDB comment '编码' DEFAULT CHARSET=utf8;
 
 
 

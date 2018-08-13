@@ -18,4 +18,8 @@ public interface UserProductService {
 
     @PostMapping(value = "/user/getAllUsers")
     ResponseBody getAllUser(@RequestBody JSONObject jsonObject);
+
+    @PostMapping(value = "/code/generateCode")
+    ResponseBody generateCode(@RequestBody JSONObject jsonObject);
+
 }

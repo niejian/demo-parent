@@ -16,7 +16,8 @@
 * redis 应用缓存、接口数据缓存
 * zookeeper 注册中心
 * rabbitMQ 消息队列
-* JWT 结合Spring Security使用，实现服务之间的鉴权
+* JWT 结合Spring Security使用，实现服务之间的鉴权。Spring Security负责请求的过滤拦截以及赋权，
+    JWT负责判断该token是否过期
 ### 1.3 项目结构
 ```
 ./demo-parent
@@ -319,7 +320,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         //得到过期时间
         Date expiration = claims.getExpiration();
 
-        //判断是否过期
+        //判断是否过期--已经不需要做了，在JJWT3.0后就直接在解析Claims的时候就已经做了这个判断
         Date now = new Date();
 
         if (now.getTime() > expiration.getTime()) {
