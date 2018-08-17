@@ -71,4 +71,48 @@ public class CodeController {
         CommonFunction.afterProcess(log, jsonObject.toString());
         return responseBody;
     }
+
+    @PostMapping(value = "/asyncGenerateCode")
+    public ResponseBody asyncGenerateCode(@RequestBody JSONObject jsonObject) {
+        Map<String, String> map = new HashMap<>(1);
+        CommonFunction.beforeProcess(log, jsonObject.toString());
+        ResponseBody responseBody = new ResponseBody();
+
+//        boolean isSuccess = false;
+//        int responseCode = -1;
+//        String responseMsg = "";
+
+        try {
+            String tableName = jsonObject.has("tableName") ? jsonObject.getString("tableName") : null;
+            String prefix = jsonObject.has("prefix") ? jsonObject.getString("prefix") : null;
+            String middle = jsonObject.has("middle") ? jsonObject.getString("middle") : null;
+            int length = jsonObject.has("length") ? jsonObject.getInt("length") : -1;
+
+            if (StringUtils.isEmpty(tableName) || StringUtils.isEmpty(prefix)
+                    || StringUtils.isEmpty(middle) || length < 0
+                    ) {
+
+                responseBody.setResponseCode(-1);
+                responseBody.setResponseMsg("");
+                responseBody.setSuccess(false);
+                responseBody.setResponseBody(map);
+                return responseBody;
+            }
+
+            codeService.asyncCreateSerialCode(tableName, prefix, middle, length);
+            //map.put("code", code);
+            responseBody.setResponseCode(0);
+            responseBody.setResponseMsg("success");
+            responseBody.setSuccess(true);
+            responseBody.setResponseBody(map);
+            return responseBody;
+        }catch (Exception e){
+            e.printStackTrace();
+            CommonFunction.genErrorMessage(log, e, jsonObject.toString());
+        }
+
+
+        CommonFunction.afterProcess(log, jsonObject.toString());
+        return responseBody;
+    }
 }

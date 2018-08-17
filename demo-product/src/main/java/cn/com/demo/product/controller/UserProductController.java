@@ -1,15 +1,19 @@
 package cn.com.demo.product.controller;
 
+import cn.com.demo.product.dao.entity.Product;
 import cn.com.demo.product.service.ProductService;
 import cn.com.demo.product.service.ProviderProductService;
 import cn.com.demo.product.service.UserProductService;
+import cn.com.demo.utils.CommonFunction;
 import cn.com.demo.utils.ResponseBody;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-
+@Slf4j
 @RestController
 public class UserProductController {
     @Autowired
@@ -44,5 +48,33 @@ public class UserProductController {
             }
         }
         return responseBody;
+    }
+
+    @PostMapping("/createProduct")
+    public ResponseBody createProduct(@RequestBody JSONObject jsonObject) {
+        ResponseBody responseBody = new ResponseBody();
+        CommonFunction.beforeProcess(log, jsonObject);
+        try {
+            String productCode = null;
+            //生成编码
+            JSONObject generateCodeJSONParam = new JSONObject();
+            ResponseBody codeResponse = this.userProductService.generateCode(generateCodeJSONParam);
+            if (codeResponse.getResponseCode() == 0 && !StringUtils.isEmpty((String) codeResponse.getResponseBody())) {
+                productCode = (String) codeResponse.getResponseBody();
+            }
+
+            if (!StringUtils.isEmpty(productCode)) {
+                jsonObject.put("productCode", productCode);
+            }
+            Product product = (Product)JSONObject.toBean(jsonObject, Product.class);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            CommonFunction.genErrorMessage(log, e);
+        }
+
+        CommonFunction.afterProcess(log, jsonObject);
+
+        return  responseBody;
     }
 }

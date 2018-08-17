@@ -5,9 +5,15 @@ import cn.com.demo.user.dao.mapper.CodeMapper;
 import cn.com.demo.user.service.CodeService;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.concurrent.FailureCallback;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.SuccessCallback;
 
 import java.util.Date;
 import java.util.List;
@@ -20,6 +26,7 @@ import java.util.List;
  * @author code4fun
  * @since 2018-08-13
  */
+@Slf4j
 @Service(value = "codeService")
 public class CodeServiceImpl extends ServiceImpl<CodeMapper, Code> implements CodeService {
     /**
@@ -39,6 +46,7 @@ public class CodeServiceImpl extends ServiceImpl<CodeMapper, Code> implements Co
         EntityWrapper ew = new EntityWrapper();
         ew.setEntity(new Code());
         ew.eq("table_ref", table)
+                .eq("code_middle", middle)
                 .eq("code_prefix", prefix)
                 .orderBy(true, "id", false);
 
@@ -70,12 +78,14 @@ public class CodeServiceImpl extends ServiceImpl<CodeMapper, Code> implements Co
             newCode.setCodeSuffix(suffix);
             newCode.setCodePrefix(prefix);
             insert(newCode);
-            if (1 == 1)
-                throw new RuntimeException("自爆");
+//            if (1 == 1)
+//                throw new RuntimeException("自爆");
         }
 
         return stringBuffer.toString();
     }
+
+
 
     /**
      *
@@ -95,5 +105,55 @@ public class CodeServiceImpl extends ServiceImpl<CodeMapper, Code> implements Co
 
     }
 
+    /**
+     * 生成编码
+     *
+     * @param table  表名
+     * @param prefix 前缀
+     * @param middle 编码中缀
+     * @param length 编码长度
+     * @return
+     */
+    @Transactional
+    @Async
+    @Override
+    public ListenableFuture<String> asyncCreateSerialCode(String table, String prefix, String middle, int length) throws Exception {
+        String code = "";
+        try {
+            log.info("---->异步生成订单编码：");
 
+            code = this.createSerialCode(table, prefix, middle, length);
+            Thread.sleep(10000);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new AsyncResult<String>(e.getMessage());
+        }
+
+        return new AsyncResult<>("success");
+    }
+
+
+    public void addCallBack(ListenableFuture listenableFuture, String successful, String failure) {
+        final String successInfo = successful;
+        final String failureInfo = failure;
+
+        /**
+         * 异步调用成功
+         */
+        SuccessCallback<String> successCallback = new SuccessCallback<String>() {
+            @Override
+            public void onSuccess(String s) {
+                log.info("{}--->回调成功， 结果：{}", successInfo, s);
+            }
+        };
+
+        FailureCallback failureCallback = new FailureCallback() {
+            @Override
+            public void onFailure(Throwable throwable) {
+                log.info("{}--->回调失败， 结果：{}", failureInfo, throwable.getMessage());
+            }
+        };
+
+        listenableFuture.addCallback(successCallback, failureCallback);
+    }
 }
