@@ -5,6 +5,7 @@ import cn.com.demo.product.dao.mapper.ProductMapper;
 import cn.com.demo.product.service.ProductService;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -17,4 +18,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
 
+    /**
+     * 创建或更新
+     *
+     * @param product
+     * @type 'create/update'
+     * @return
+     */
+    @Transactional
+    @Override
+    public Product createOrUpdateProduct(Product product, String type) {
+        switch (type) {
+            case "create":
+                insert(product);
+                break;
+            case "update":
+                updateById(product);
+                break;
+        }
+        return product;
+    }
 }
