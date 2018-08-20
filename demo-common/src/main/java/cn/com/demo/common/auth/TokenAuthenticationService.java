@@ -3,11 +3,13 @@ package cn.com.demo.common.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import net.sf.json.JSONObject;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,9 +62,18 @@ public class TokenAuthenticationService {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .compact();
-
+        String tokenStr = TOKEN_PREFIX + token;
         //把token设置到响应头中去
-        response.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+        response.addHeader(HEADER_STRING, tokenStr);
+        JSONObject responseJson = new JSONObject();
+        responseJson.put(HEADER_STRING, tokenStr);
+        try {
+            //将token输出到返回体中
+            response.getWriter().print(responseJson.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -113,10 +124,15 @@ public class TokenAuthenticationService {
         }
 
 
-        if (username != null) {
-            return new UsernamePasswordAuthenticationToken(username, null, authorities);
+        if (StringUtils.isEmpty(username)) {
+            //return new UsernamePasswordAuthenticationToken(username, null, authorities);
+            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
         }
-        return null;
+
+        //可以将用户的账号、权限等信息缓存到request中，当请求到了具体的controller的时候，需要这些参数的时候从request中再把它拿出来即可
+        request.setAttribute("userCode", username);
+
+        return new UsernamePasswordAuthenticationToken(username, null, authorities);
 
 
     }

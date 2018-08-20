@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -115,6 +116,32 @@ public class UserController {
         responseBody.setResponseBody(null);
         responseBody.setResponseCode(0);
         responseBody.setSuccess(true);
+        return responseBody;
+    }
+
+    /**
+     * 获取登录的用户信息；从request中获取到登录用户的userId
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "/getLoginUserInfo")
+    public ResponseBody getLoginUserInfo(HttpServletRequest request) {
+        CommonFunction.beforeProcess(log);
+        ResponseBody responseBody = new ResponseBody();
+        String userId = (String)request.getAttribute("userCode");
+        User user = new User();
+        EntityWrapper ew = new EntityWrapper();
+        ew.setEntity(new User());
+
+        ew.eq("user_id", userId);
+
+        log.info("输出语句：{}", ew.getSqlSegment());
+        user = this.userService.selectById(userId);
+        responseBody.setResponseBody(user);
+        responseBody.setResponseCode(0);
+        responseBody.setSuccess(true);
+        responseBody.setResponseMsg("success");
+
         return responseBody;
     }
 }
