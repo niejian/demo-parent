@@ -15,6 +15,7 @@
         <module>demo-product</module>
         <module>demo-auth</module>
         <module>demo-cache</module>
+        <module>demo-message</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -22,6 +23,7 @@
 
         <eureka.version>1.4.5.RELEASE</eureka.version>
         <zuul.version>1.4.5.RELEASE</zuul.version>
+        <kafka.version>2.1.8.RELEASE</kafka.version>
     </properties>
 
     <parent>

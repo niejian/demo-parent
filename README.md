@@ -330,8 +330,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 
         if (username != null) {
-            return new UsernamePasswordAuthenticationToken(username, null, authorities);
+            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
+            // return new UsernamePasswordAuthenticationToken(username, null, authorities);
         }
+        //可以将用户的账号、权限等信息缓存到request中，当请求到了具体的controller的时候，需要这些参数的时候从request中再把它拿出来即可
+         request.setAttribute("userCode", username);
         return null;
 
 
