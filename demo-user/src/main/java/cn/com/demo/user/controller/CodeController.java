@@ -1,4 +1,4 @@
-package cn.com.demo.user.web;
+package cn.com.demo.user.controller;
 
 import cn.com.demo.user.service.CodeService;
 import cn.com.demo.utils.CommonFunction;

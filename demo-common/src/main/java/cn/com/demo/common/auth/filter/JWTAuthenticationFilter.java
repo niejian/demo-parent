@@ -37,17 +37,17 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         //要拦截的请求过来的时候先调用此方法，来判断header中的token是否合法
-        Authentication authentication = TokenAuthenticationService.getAuthentication(request);
+        Authentication authentication = TokenAuthenticationService.getAuthentication(request, response);
 
         //判断是否有token
         if (authentication == null) {
-            response.getWriter().print("无权限访问，请先登录");
+            //response.getOutputStream()..print("无权限访问，请先登录");
+            logger.info("无权限访问，请先登录");
             chain.doFilter(request, response);
-
             return;
+        } else {
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         //放行
         chain.doFilter(request, response);

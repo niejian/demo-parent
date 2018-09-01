@@ -1,4 +1,4 @@
-package cn.com.demo.user.web;
+package cn.com.demo.user.controller;
 
 
 import org.springframework.web.bind.annotation.RequestMapping;

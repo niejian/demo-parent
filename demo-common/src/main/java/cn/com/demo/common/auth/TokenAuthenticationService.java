@@ -24,6 +24,7 @@ public class TokenAuthenticationService {
      * 过期时间 2小时
      */
     static final long EXPIRATIONTIME = 7200000; //1000 * 60 * 60 * 2;
+    //static final long EXPIRATIONTIME = 120000;
     /**
      * JWT 密码
      */
@@ -41,6 +42,11 @@ public class TokenAuthenticationService {
      * 自定义的 playload
      */
     static final String AUTHORITIES = "authorities";
+
+    /**
+     * 距离token过期的时间
+     */
+    private static final Long TOKEN_FLUSH_SEC = 30000L;
 
     /**
      * 将jwt token 写入header头部
@@ -69,10 +75,42 @@ public class TokenAuthenticationService {
         responseJson.put(HEADER_STRING, tokenStr);
         try {
             //将token输出到返回体中
-            response.getWriter().print(responseJson.toString());
+            response.getOutputStream().print(responseJson.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+    }
+
+    /**
+     * token快过期了，就刷新token
+     * @param claims 用户的权限信息
+     * @throws Exception
+     */
+    private static String flushToken(Claims claims) throws Exception {
+        String auth = (String)claims.get(AUTHORITIES);
+
+        // 得到 权限（角色）
+        List<GrantedAuthority> authorities =  AuthorityUtils.
+                commaSeparatedStringToAuthorityList((String) claims.get(AUTHORITIES));
+
+        //得到用户名
+        String username = claims.getSubject();
+
+        //得到过期时间
+        //Date expirationTime = claims.getExpiration().getTime();
+        //重新生成token
+        String token = Jwts.builder()
+                            //生成token的时候可以把自定义数据加进去,比如用户权限
+                            .claim(AUTHORITIES, "ROLE_ADMIN,AUTH_WRITE")
+                            .setSubject(claims.getSubject())
+            //                .setClaims(claims)
+                            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
+                            .signWith(SignatureAlgorithm.HS512, SECRET)
+                            .compact();
+
+        return token;
 
 
     }
@@ -82,7 +120,7 @@ public class TokenAuthenticationService {
      * @param request
      * @return
      */
-    public static Authentication getAuthentication(HttpServletRequest request) {
+    public static Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response) {
         // 从Header中拿到token
         String token = request.getHeader(HEADER_STRING);
         if(token==null){
@@ -114,15 +152,27 @@ public class TokenAuthenticationService {
 
         //得到过期时间
         Date expiration = claims.getExpiration();
+        long expirationTime = expiration.getTime();
 
         //判断是否过期
-        Date now = new Date();
+//        Date now = new Date();
 
-        if (now.getTime() > expiration.getTime()) {
+//        if (now.getTime() > expiration.getTime()) {
+//
+//            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
+//        }
+        //自动刷新token机制，如果token的有效时间还剩下30s，自动刷新token并将token返回出去并写到request中
+        long currentTimeMillis = System.currentTimeMillis();
+        if (expirationTime - currentTimeMillis <= TOKEN_FLUSH_SEC) {
+            try {
+                token = flushToken(claims);
+                //把token设置到响应头中去
+                response.addHeader(HEADER_STRING, token);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
         }
-
 
         if (StringUtils.isEmpty(username)) {
             //return new UsernamePasswordAuthenticationToken(username, null, authorities);

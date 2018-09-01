@@ -1,6 +1,7 @@
-package cn.com.demo.user.web;
+package cn.com.demo.user.controller;
 
 
+import cn.com.demo.common.aop.token.FlushTokenAspect;
 import cn.com.demo.user.dao.entity.User;
 import cn.com.demo.user.service.GetProductService;
 import cn.com.demo.user.service.UserService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 
@@ -42,8 +44,9 @@ public class UserController {
 
     private static final String DATE_PARTTEN = "yyyy-MM-dd HH:mm:ss";
 
+    @FlushTokenAspect
     @GetMapping(value = "/getUser/{userId}")
-    public ResponseBody getUser(@PathVariable("userId") String userId){
+    public ResponseBody getUser(@PathVariable("userId") String userId, HttpServletResponse response){
         CommonFunction.beforeProcess(log, userId);
         ResponseBody responseBody = new ResponseBody();
         User user = new User();
@@ -54,6 +57,7 @@ public class UserController {
 
         log.info("输出语句：{}", ew.getSqlSegment());
         user = this.userService.selectById(userId);
+
         responseBody.setResponseBody(user);
         responseBody.setResponseCode(0);
         responseBody.setSuccess(true);
