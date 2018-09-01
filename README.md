@@ -20,16 +20,16 @@
     JWT负责判断该token是否过期
 ### 1.3 项目结构
 ```
-./demo-parent
 ├── README.md
-├── demo-auth 认证模块，暂时没用
-├── demo-common --公共方法区。JWT的生成和认证方法在此处
-├── demo-eureka -- 服务注册中心
-├── demo-gateway -- 网关配置
+├── demo-cache 缓存模块
+├── demo-common 公共模块，包括切面，token认证等一些公共方法
+├── demo-eureka 注册中心
+├── demo-gateway 网关
+├── demo-message 消息模块（kafka）
 ├── demo-parent.iml
-├── demo-product -- 业务模块（产品中心）
-├── demo-user -- 业务模块 （用户中心）
-├── demo.sql -- 初始化sql
+├── demo-product 产品模块
+├── demo-user 用户模块
+├── demo.sql 初始化sql
 └── pom.xml
 ```
 
@@ -256,7 +256,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
   /**
      * 将jwt token 写入header头部
-     *
+     * 添加token刷新机制，当token还有30s过期的时候主动刷新token并存放到response的header中
+     * 为了安全起见，这里的token应该使用非对称加密，返回到客户端，当客户端下次再请求的时候拿着解密后的token来请求
      * @param response
      * @param authentication
      */
@@ -280,65 +281,75 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     }
 
-    /**
-     * 从请求头中解析出 Authentication；校验token
-     * @param request
-     * @return
-     */
-    public static Authentication getAuthentication(HttpServletRequest request) {
-        // 从Header中拿到token
-        String token = request.getHeader(HEADER_STRING);
-        if(token==null){
-            return null;
-
+        /**
+         * 从请求头中解析出 Authentication
+         * @param request
+         * @return
+         */
+        public static Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response) {
+            // 从Header中拿到token
+            String token = request.getHeader(HEADER_STRING);
+            if(token==null){
+                return null;
+    
+            }
+    
+            //在JWT的playload中，包含了token的过期时间、权限等信息。如果token过期在parseClaimsJws方法会抛出 ExpiredJwtException
+    
+            Claims claims = null;
+            try {
+                claims = Jwts.parser().setSigningKey(SECRET)
+                        .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                        .getBody();
+            } catch (Exception e) {
+                return null;
+            }
+    
+    
+    
+            String auth = (String)claims.get(AUTHORITIES);
+    
+            // 得到 权限（角色）
+            List<GrantedAuthority> authorities =  AuthorityUtils.
+                    commaSeparatedStringToAuthorityList((String) claims.get(AUTHORITIES));
+    
+            //得到用户名
+            String username = claims.getSubject();
+    
+            //得到过期时间
+            Date expiration = claims.getExpiration();
+            long expirationTime = expiration.getTime();
+    
+            //判断是否过期
+    //        Date now = new Date();
+    
+    //        if (now.getTime() > expiration.getTime()) {
+    //
+    //            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
+    //        }
+            //自动刷新token机制，如果token的有效时间还剩下30s，自动刷新token并将token返回出去并写到request中
+            long currentTimeMillis = System.currentTimeMillis();
+            if (expirationTime - currentTimeMillis <= TOKEN_FLUSH_SEC) {
+                try {
+                    token = flushToken(claims);
+                    //把token设置到响应头中去
+                    response.addHeader(HEADER_STRING, token);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+    
+            }
+    
+            if (StringUtils.isEmpty(username)) {
+                //return new UsernamePasswordAuthenticationToken(username, null, authorities);
+                throw new UsernameNotFoundException("该账号已过期,请重新登陆");
+            }
+    
+            //可以将用户的账号、权限等信息缓存到request中，当请求到了具体的controller的时候，需要这些参数的时候从request中再把它拿出来即可
+            request.setAttribute("userCode", username);
+    
+            return new UsernamePasswordAuthenticationToken(username, null, authorities);
         }
-
-        //在JWT的playload中，包含了token的过期时间、权限等信息。如果token过期在parseClaimsJws方法会抛出 ExpiredJwtException
-
-        Claims claims = null;
-        try {
-            claims = Jwts.parser().setSigningKey(SECRET)
-                    // 解密token，并将权限信息赋值到Claim中。
-                    // 这个方法会判断当前传入的token是否有效，如果无效，就会抛出token失效的异常
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                    .getBody();
-        } catch (Exception e) {
-            return null;
-        }
-
-
-
-        String auth = (String)claims.get(AUTHORITIES);
-
-        // 得到 权限（角色）
-        List<GrantedAuthority> authorities =  AuthorityUtils.
-                commaSeparatedStringToAuthorityList((String) claims.get(AUTHORITIES));
-
-        //得到用户名
-        String username = claims.getSubject();
-
-        //得到过期时间
-        Date expiration = claims.getExpiration();
-
-        //判断是否过期--已经不需要做了，在JJWT3.0后就直接在解析Claims的时候就已经做了这个判断
-        Date now = new Date();
-
-        if (now.getTime() > expiration.getTime()) {
-
-            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
-        }
-
-
-        if (username != null) {
-            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
-            // return new UsernamePasswordAuthenticationToken(username, null, authorities);
-        }
-        //可以将用户的账号、权限等信息缓存到request中，当请求到了具体的controller的时候，需要这些参数的时候从request中再把它拿出来即可
-         request.setAttribute("userCode", username);
-        return null;
-
-
-    }
     
 
 ```
@@ -397,6 +408,72 @@ ribbon:
 ```
 - 服务的application.ame命名规则
 application.name的命名规则应当使用 - 来分割，如果使用 _ 的话，在feignclient端注入服务名的时候会爆unknow host id的异常
+### 1.6 获取刷新后的token
+> 这里使用的事aop（AfterReturning）的方式来拦截。具体定义如下
+#### 1.6.1 生命切面注解
+```java
+/**
+ * 自动刷新token注解
+ * 写在每个请求当方法上面，当token还有30秒过期的时候，刷新token并将token返回到返回参数列表中来
+ * @author: code4fun
+ * @date: 2018/9/1:下午5:17
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface FlushTokenAspect {
+    String value() default "";
+}
+```
+##### 1.6.2 注解的具体实现
+```java
+/**
+ * token刷新注解实现
+ * @author: code4fun
+ * @date: 2018/9/1:下午5:21
+ */
+@Component
+@Aspect
+public class FlushTokenImpl {
+    private Logger logger = LoggerFactory.getLogger(FlushTokenImpl.class);
 
+    @Pointcut("@annotation(cn.com.demo.common.aop.token.FlushTokenAspect)")
+    public void point(){
+
+    }
+
+    @Before("point()")
+    public void doBefore(JoinPoint joinPoint) {
+        logger.info("---------->shu前置通知");
+    }
+
+
+    /**
+     * 拦截请求返回
+     * 如果response的含有token（刷新后的token），将token拼接到返回体中
+     * 这里返回的token最好使用非对称加密的方式。客户端拿到加密后的token解密完再来请求
+     * @param obj
+     */
+    @AfterReturning(returning = "obj", pointcut = "point()")
+    public void doAfterReturning(Object obj) {
+        //获取当前的请求信息
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletResponse response = attributes.getResponse();
+        //如果response的header中已经包含可token，说明此次请求token已经刷新，需要将token返回到客户端
+        String token = response.getHeader("token");
+        if (!StringUtils.isEmpty(token)) {
+
+            ((ResponseBody) obj).setToken(token);
+        }
+
+    }
+}
+```
+> 因为项目分模块设计的原因，注解模块不在对应的业务层上面。所以应该要在对应的业务系统引入；
+具体如下：
+```java
+@Import({
+        cn.com.demo.common.aop.token.FlushTokenImpl.class
+})
+```
 
 

@@ -1,7 +1,6 @@
 package cn.com.demo.common.aop.token;
 
 import cn.com.demo.utils.ResponseBody;
-import net.sf.json.JSONObject;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -37,6 +36,12 @@ public class FlushTokenImpl {
     }
 
 
+    /**
+     * 拦截请求返回
+     * 如果response的含有token（刷新后的token），将token拼接到返回体中
+     * 这里返回的token最好使用非对称加密的方式。客户端拿到加密后的token解密完再来请求
+     * @param obj
+     */
     @AfterReturning(returning = "obj", pointcut = "point()")
     public void doAfterReturning(Object obj) {
         //获取当前的请求信息

@@ -117,6 +117,8 @@ public class TokenAuthenticationService {
 
     /**
      * 从请求头中解析出 Authentication
+     * 添加token刷新机制，当token还有30s过期的时候主动刷新token并存放到response的header中
+     *      * 为了安全起见，这里的token应该使用非对称加密，返回到客户端，当客户端下次再请求的时候拿着解密后的token来请求
      * @param request
      * @return
      */
@@ -183,7 +185,5 @@ public class TokenAuthenticationService {
         request.setAttribute("userCode", username);
 
         return new UsernamePasswordAuthenticationToken(username, null, authorities);
-
-
     }
 }
