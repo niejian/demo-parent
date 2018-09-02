@@ -1,6 +1,7 @@
 package cn.com.demo.user.controller;
 
 
+import cn.com.demo.common.aop.log.LogAspect;
 import cn.com.demo.common.aop.token.FlushTokenAspect;
 import cn.com.demo.user.dao.entity.User;
 import cn.com.demo.user.service.GetProductService;
@@ -9,10 +10,10 @@ import cn.com.demo.utils.CommonFunction;
 import cn.com.demo.utils.ResponseBody;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import lombok.extern.slf4j.Slf4j;
+
 import net.sf.json.JSON;
-import org.apache.commons.lang.time.DateFormatUtils;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.time.DateUtils;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,7 @@ public class UserController {
 
     private static final String DATE_PARTTEN = "yyyy-MM-dd HH:mm:ss";
 
+    @LogAspect
     @FlushTokenAspect
     @GetMapping(value = "/getUser/{userId}")
     public ResponseBody getUser(@PathVariable("userId") String userId, HttpServletResponse response){
@@ -128,9 +130,10 @@ public class UserController {
      * @param request
      * @return
      */
+    @LogAspect
     @PostMapping(value = "/getLoginUserInfo")
-    public ResponseBody getLoginUserInfo(HttpServletRequest request) {
-        CommonFunction.beforeProcess(log);
+    public ResponseBody getLoginUserInfo(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
+        CommonFunction.beforeProcess(log, jsonObject);
         ResponseBody responseBody = new ResponseBody();
         String userId = (String)request.getAttribute("userCode");
         User user = new User();
