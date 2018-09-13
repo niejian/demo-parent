@@ -10,7 +10,7 @@
     * Feign 负责服务间的调用
     * zuul 向外暴露的服务网关
 * Spring Security 安全框架 
- 
+
 * ORM
     * mybatis plus 对mybatis的进一步封装
 * redis 应用缓存、接口数据缓存
@@ -407,7 +407,37 @@ ribbon:
 
 ```
 - 服务的application.ame命名规则
-application.name的命名规则应当使用 - 来分割，如果使用 _ 的话，在feignclient端注入服务名的时候会爆unknow host id的异常
+  application.name的命名规则应当使用 - 来分割，如果使用 _ 的话，在feignclient端注入服务名的时候会爆unknow host id的异常
+
+- Druid数据源配置
+
+  ```properties
+  spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+  spring.datasource.url=jdbc:mysql://*********************?allowMultiQueries=true&autoReconnect=true 
+  spring.datasource.username=admin
+  spring.datasource.password=admin
+  spring.datasource.driverClassName=com.mysql.jdbc.Driver
+  #dataSource Pool configuration
+  spring.datasource.initialSize=5
+  spring.datasource.minIdle=5
+  spring.datasource.maxActive=20
+  spring.datasource.maxWait=60000
+  spring.datasource.timeBetweenEvictionRunsMillis=60000   
+  spring.datasource.minEvictableIdleTimeMillis=300000
+  spring.datasource.validationQuery=SELECT 1 FROM DUAL
+  spring.datasource.testWhileIdle=true
+  spring.datasource.testOnBorrow=false
+  spring.datasource.exceptionSorter=true
+  spring.datasource.testOnReturn=false
+  spring.datasource.poolPreparedStatements=true
+  spring.datasource.filters=stat,wall,log4j
+  spring.datasource.maxPoolPreparedStatementPerConnectionSize=20
+  spring.datasource.connectionProperties=druid.stat.mergeSql=true
+  druid.stat.slowSqlMillis=500
+  spring.datasource.useGlobalDataSourceStat=true
+  ```
+
+  
 ### 1.6 获取刷新后的token
 > 这里使用的事aop（AfterReturning）的方式来拦截。具体定义如下
 #### 1.6.1 生命切面注解
