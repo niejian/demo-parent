@@ -16,6 +16,7 @@
         <module>demo-auth</module>
         <module>demo-cache</module>
         <module>demo-message</module>
+        <module>demo-portal</module>
     </modules>
     <packaging>pom</packaging>
 
