@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.demo.portal.dao.menu.mapper.DemoMenuMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.demo.portal.dao.menu.entity.DemoMenu">
+        <id column="menu_id" property="menuId" />
+        <result column="menu_code" property="menuCode" />
+        <result column="menu_name" property="menuName" />
+        <result column="parent_menu_id" property="parentMenuId" />
+        <result column="menu_addr" property="menuAddr" />
+        <result column="create_date" property="createDate" />
+        <result column="create_code" property="createCode" />
+        <result column="valid" property="valid" />
+    </resultMap>
+
+</mapper>

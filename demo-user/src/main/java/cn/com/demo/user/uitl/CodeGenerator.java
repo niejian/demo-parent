@@ -38,16 +38,16 @@ public class CodeGenerator {
         //dsc.setDbType(DbType.MYSQL);
         dsc.setDriverName("com.mysql.jdbc.Driver");
         dsc.setUsername("root");
-        dsc.setPassword("Blue123!");
-        dsc.setUrl("jdbc:mysql://yun1:3306/demo");
+        dsc.setPassword("root");
+        dsc.setUrl("jdbc:mysql://yun2:3306/demo");
         mpg.setDataSource(dsc);
 
         // 策略配置
         StrategyConfig strategy = new StrategyConfig();
-        strategy.setTablePrefix(new String[] { "demo_" });// 此处可以修改为您的表前缀,生成的文件不包含此前缀
+        //strategy.setTablePrefix(new String[] { "demo_" });// 此处可以修改为您的表前缀,生成的文件不包含此前缀
         strategy.setNaming(NamingStrategy.underline_to_camel);// 表名生成策略
-        strategy.setInclude(new String[] { "demo_code" }); // 需要生成的表
-
+        //strategy.setInclude(new String[] { "demo_role", "demo_user_role", "demo_menu", "demo_role_menu" }); // 需要生成的表
+        strategy.setInclude(new String[] { "demo_menu", "demo_role_menu" });
         strategy.setSuperServiceClass(null);
         strategy.setSuperServiceImplClass(null);
         strategy.setSuperMapperClass(null);
@@ -56,13 +56,14 @@ public class CodeGenerator {
 
         // 包配置
         PackageConfig pc = new PackageConfig();
-        pc.setParent("cn.com.demo.user");
+        pc.setParent("cn.com.demo.portal.service");
 //        pc.setController("controller");
         pc.setService("service");
         pc.setServiceImpl("serviceImpl");
-        pc.setMapper("dao.mapper");
-        pc.setEntity("dao.entity");
-        pc.setXml("dao.mapper");
+        pc.setParent("cn.com.demo.portal.dao");
+        pc.setMapper("menu.mapper");
+        pc.setEntity("menu.entity");
+        pc.setXml("menu.mapper");
         mpg.setPackageInfo(pc);
 
         // 执行生成

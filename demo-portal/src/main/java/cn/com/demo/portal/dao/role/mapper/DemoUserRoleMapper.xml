@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.demo.portal.dao.role.mapper.DemoUserRoleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.demo.portal.dao.role.entity.DemoUserRole">
+        <id column="user_role_id" property="userRoleId" />
+        <result column="role_id" property="roleId" />
+        <result column="user_id" property="userId" />
+        <result column="role_name" property="roleName" />
+        <result column="role_code" property="roleCode" />
+        <result column="start_date" property="startDate" />
+        <result column="end_date" property="endDate" />
+        <result column="valid" property="valid" />
+    </resultMap>
+
+</mapper>
