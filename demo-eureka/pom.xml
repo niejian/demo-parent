@@ -12,6 +12,13 @@
     <description>注册中心</description>
 
     <artifactId>demo-eureka</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-eureka-server</artifactId>
+            <version>1.4.5.RELEASE</version>
+        </dependency>
+    </dependencies>
 
 
     <!-- Package as an executable jar -->
