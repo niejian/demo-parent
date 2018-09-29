@@ -19,6 +19,14 @@
             <groupId>cn.com.demo</groupId>
             <artifactId>demo-common</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <!--在common模块中有引入jdbc模块，这里需要排除吊不然，启动回检查datasource是否设置-->
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-jdbc</artifactId>
+
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

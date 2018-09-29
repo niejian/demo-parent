@@ -1,6 +1,8 @@
 package cn.com.demo.common.auth.filter;
 
 import cn.com.demo.common.auth.TokenAuthenticationService;
+import cn.com.demo.utils.ResponseBody;
+import net.sf.json.JSONObject;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,14 +45,23 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
         if (authentication == null) {
             //response.getOutputStream()..print("无权限访问，请先登录");
             logger.info("无权限访问，请先登录");
-            chain.doFilter(request, response);
-            return;
+            //chain.doFilter(request, response);
+            response.setCharacterEncoding("UTF-8");
+            ResponseBody responseBody = new ResponseBody();
+            responseBody.setToken("");
+            responseBody.setSuccess(false);
+            responseBody.setResponseBody("无权限访问，请先登录");
+            responseBody.setResponseMsg("无权限访问，请先登录");
+            responseBody.setResponseCode(401);
+            response.getWriter().print(JSONObject.fromObject(responseBody).toString());
+
         } else {
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            //放行
+            chain.doFilter(request, response);
         }
 
-        //放行
-        chain.doFilter(request, response);
+
 
 
     }

@@ -1,5 +1,7 @@
 package cn.com.demo.common.auth;
 
+import cn.com.demo.common.encryption.RSAUtils;
+import cn.com.demo.common.exception.ApiNotpermissionException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,8 +15,10 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * token 验证工具类
@@ -23,7 +27,7 @@ public class TokenAuthenticationService {
     /**
      * 过期时间 2小时
      */
-    static final long EXPIRATIONTIME = 7200000; //1000 * 60 * 60 * 2;
+    static final long EXPIRATIONTIME = 7200000;
     //static final long EXPIRATIONTIME = 120000;
     /**
      * JWT 密码
@@ -47,6 +51,29 @@ public class TokenAuthenticationService {
      * 距离token过期的时间
      */
     private static final Long TOKEN_FLUSH_SEC = 30000L;
+
+    private static Map<String, Object> keyMap = null;
+    private static byte[] publicKey;
+    private static byte[] privateKey;
+
+    /**
+     * 初始化RSA算法
+     */
+    static {
+        try {
+            //初始化密钥
+            //生成密钥对
+            keyMap = RSAUtils.initKey();
+            //公钥
+            publicKey = RSAUtils.getPublicKey(keyMap);
+
+            //私钥
+            privateKey = RSAUtils.getPrivateKey(keyMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     /**
      * 将jwt token 写入header头部
@@ -123,66 +150,105 @@ public class TokenAuthenticationService {
      * @return
      */
     public static Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        // 从Header中拿到token
-        String token = request.getHeader(HEADER_STRING);
-        if(token==null){
-            return null;
-
-        }
-
-        //在JWT的playload中，包含了token的过期时间、权限等信息。如果token过期在parseClaimsJws方法会抛出 ExpiredJwtException
-
-        Claims claims = null;
-        try {
-            claims = Jwts.parser().setSigningKey(SECRET)
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                    .getBody();
-        } catch (Exception e) {
-            return null;
-        }
+        /***
+         * 接口间的调用将调用的接口名称rsa加密传过来，服务端看是否相等，如果相同就允许调用
+         */
+        String code = request.getParameter("code");
+        String token = null;
+        boolean isContinue = true;
+        String username = "";
+        List<GrantedAuthority> authorities = new ArrayList<>();
 
 
+        if (StringUtils.isEmpty(code)) {
+            // 从Header中拿到token，对于注册用户来说
+            token = request.getHeader(HEADER_STRING);
+            if (token == null) {
+                return null;
 
-        String auth = (String)claims.get(AUTHORITIES);
-
-        // 得到 权限（角色）
-        List<GrantedAuthority> authorities =  AuthorityUtils.
-                commaSeparatedStringToAuthorityList((String) claims.get(AUTHORITIES));
-
-        //得到用户名
-        String username = claims.getSubject();
-
-        //得到过期时间
-        Date expiration = claims.getExpiration();
-        long expirationTime = expiration.getTime();
-
-        //判断是否过期
-//        Date now = new Date();
-
-//        if (now.getTime() > expiration.getTime()) {
-//
-//            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
-//        }
-        //自动刷新token机制，如果token的有效时间还剩下30s，自动刷新token并将token返回出去并写到request中
-        long currentTimeMillis = System.currentTimeMillis();
-        if (expirationTime - currentTimeMillis <= TOKEN_FLUSH_SEC) {
+            }
+        } else {
+            //对于普通的service之间的调用来说，校验公共参数是否合理
+            // code解密后的内容 公钥加密，私钥解密
+            // 加密的内容是访问路径
             try {
-                token = flushToken(claims);
-                //把token设置到响应头中去
-                response.addHeader(HEADER_STRING, token);
+                byte[] codeEncode = RSAUtils.encryptByPrivateKey(code.getBytes(), privateKey);
+                if (null != codeEncode && codeEncode.length > 0) {
+                    String codeStr = new String(codeEncode);
+                    String uri = request.getRequestURI();
+                    if (!uri.equals(codeStr)) {
+                        throw new ApiNotpermissionException("接口参数校验失败，不允许调用");
+
+                    }
+                    isContinue = false;
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
 
-        if (StringUtils.isEmpty(username)) {
-            //return new UsernamePasswordAuthenticationToken(username, null, authorities);
-            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
+
+        //有登录操作的接口权限验证
+        if (isContinue) {
+            //在JWT的playload中，包含了token的过期时间、权限等信息。如果token过期在parseClaimsJws方法会抛出 ExpiredJwtException
+            //
+
+            Claims claims = null;
+            try {
+                claims = Jwts.parser().setSigningKey(SECRET)
+                        .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                        .getBody();
+            } catch (Exception e) {
+                return null;
+            }
+
+
+
+            String auth = (String)claims.get(AUTHORITIES);
+
+            // 得到 权限（角色
+            authorities =  AuthorityUtils.
+                    commaSeparatedStringToAuthorityList((String) claims.get(AUTHORITIES));
+
+            //得到用户名
+            username = claims.getSubject();
+
+            //得到过期时间
+            Date expiration = claims.getExpiration();
+            long expirationTime = expiration.getTime();
+
+            //判断是否过期
+//        Date now = new Date();
+
+//        if (now.getTime() > expiration.getTime()) {
+//
+//            throw new UsernameNotFoundException("该账号已过期,请重新登陆");
+//        }
+            //自动刷新token机制，如果token的有效时间还剩下30s，自动刷新token并将token返回出去并写到request中
+            long currentTimeMillis = System.currentTimeMillis();
+            if (expirationTime - currentTimeMillis <= TOKEN_FLUSH_SEC) {
+                try {
+                    token = flushToken(claims);
+                    //把token设置到响应头中去
+                    response.addHeader(HEADER_STRING, token);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            if (StringUtils.isEmpty(username)) {
+                //return new UsernamePasswordAuthenticationToken(username, null, authorities);
+                throw new UsernameNotFoundException("该账号已过期,请重新登陆");
+            }
+
+            //可以将用户的账号、权限等信息缓存到request中，当请求到了具体的controller的时候，需要这些参数的时候从request中再把它拿出来即可
+            request.setAttribute("userCode", username);
         }
 
-        //可以将用户的账号、权限等信息缓存到request中，当请求到了具体的controller的时候，需要这些参数的时候从request中再把它拿出来即可
-        request.setAttribute("userCode", username);
+
 
         return new UsernamePasswordAuthenticationToken(username, null, authorities);
     }

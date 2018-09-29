@@ -1,5 +1,7 @@
 package cn.com.demo.user;
 
+import cn.com.demo.CommonBootstrap;
+import cn.com.demo.auth.AuthBootstrap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -22,6 +24,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Import({
         cn.com.demo.common.aop.token.FlushTokenImpl.class,
         cn.com.demo.common.aop.log.LogAspectImpl.class
+})
+@ComponentScan(basePackageClasses = {
+        UserBootStrap.class,
+        AuthBootstrap.class,
+        CommonBootstrap.class
 })
 public class UserBootStrap {
 
