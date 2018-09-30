@@ -1,5 +1,6 @@
 package cn.com.demo.auth.service;
 
+import cn.com.demo.common.aop.exception.ExceptionAspect;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
  *
  *
  */
+
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     //构造方法传进来
@@ -56,6 +58,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
      * 在这种情况下，将会尝试支持下一个身份验证类的验证提供者。
      * @throws UsernameNotFoundException
      */
+    @ExceptionAspect
     @Override
     public Authentication authenticate(Authentication authentication) throws UsernameNotFoundException {
         // 获取认证的用户名 & 密码
@@ -64,6 +67,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         //通过用户名从数据库中查询该用户
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        if (null == userDetails) {
+            // 用户Id不存在
+            throw new UsernameNotFoundException("用户：" + username + "不存在");
+        }
 
         //判断密码(这里是md5加密方式)是否正确
         String dbPassword = userDetails.getPassword();

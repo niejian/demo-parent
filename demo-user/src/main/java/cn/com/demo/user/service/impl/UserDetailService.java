@@ -39,11 +39,14 @@ public class UserDetailService implements UserDetailsService {
 
         //查不到用户信息
         if (CollectionUtils.isEmpty(userList)) {
-            throw new UsernameNotFoundException("该用户不存在");
+            return null;
+            //throw new UsernameNotFoundException("该用户不存在");
+        } else {
+            User user = userList.get(0);
+            return new org.springframework.security.core.userdetails.User(username, user.getUserPassword(), new ArrayList<>());
+
         }
 
-        User user = userList.get(0);
-        return new org.springframework.security.core.userdetails.User(username, user.getUserPassword(), new ArrayList<>());
 
     }
 }

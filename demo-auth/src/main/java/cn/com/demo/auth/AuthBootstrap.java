@@ -1,5 +1,6 @@
 package cn.com.demo.auth;
 
+import cn.com.demo.CommonBootstrap;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,9 @@ import org.springframework.context.annotation.Configuration;
  */
 @EnableAutoConfiguration
 @Configuration
-@ComponentScan(basePackageClasses = AuthBootstrap.class)
+@ComponentScan(basePackageClasses = {
+        AuthBootstrap.class,
+        CommonBootstrap.class
+})
 public class AuthBootstrap {
 }

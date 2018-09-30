@@ -1,6 +1,7 @@
 package cn.com.demo.auth.config;
 
 import cn.com.demo.auth.filter.JWTLoginFilter;
+import cn.com.demo.auth.handler.loginFailHandler;
 import cn.com.demo.auth.service.CustomAuthenticationProvider;
 import cn.com.demo.common.auth.filter.JWTAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     //private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
     private UserDetailsService userDetailService;
+    @Autowired
+    private loginFailHandler loginFailHandler;
 
     public SecurityConfig() {
         super();
@@ -55,6 +58,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/login/**").permitAll()
                 // 所有请求需要身份认证
                 .anyRequest().authenticated()
+                .and()
+                .formLogin().failureHandler(loginFailHandler)
                 .and()
                 //拦截登录操作，
                 .addFilterBefore(new JWTLoginFilter("/login", authenticationManager()), UsernamePasswordAuthenticationFilter.class)

@@ -21,10 +21,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 //@EnableAspectJAutoProxy
 //@ComponentScan({"cn.com.demo"})
 //将想要的bean加载到容器中
-@Import({
-        cn.com.demo.common.aop.token.FlushTokenImpl.class,
-        cn.com.demo.common.aop.log.LogAspectImpl.class
-})
 @ComponentScan(basePackageClasses = {
         UserBootStrap.class,
         AuthBootstrap.class,
