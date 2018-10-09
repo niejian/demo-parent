@@ -6,6 +6,8 @@ import cn.com.demo.portal.service.RemoteUserCallService;
 import cn.com.demo.utils.ResponseBody;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.FeignContext;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,6 +43,7 @@ public class PortalUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         //TODO 1.查询该用户是否存在
         ResponseBody responseBody = this.remoteUserCallService.getUser(username);
+//        this.remoteUserCallService.getClass().getMethods()[0].
         JSONObject user = new JSONObject();
         if (responseBody.isSuccess() && responseBody.getResponseCode() == 0) {
             user = JSONObject.fromObject(responseBody.getResponseBody());

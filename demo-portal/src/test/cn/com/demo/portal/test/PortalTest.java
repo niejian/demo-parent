@@ -23,13 +23,13 @@ public class PortalTest {
     @Autowired
     private DemoRoleService demoRoleService;
 
-    @Ignore
+//    @Ignore
     @Test
     public void test01() {
         DemoRole demoRole = new DemoRole();
         demoRole.setEndDate(new Date());
         demoRole.setRoleCode("ROLE_001");
-        demoRole.setRoleId("001");
+        demoRole.setRoleId("002");
         demoRole.setRoleName("test1");
         demoRole.setStartDate(new Date());
         demoRole.setValid(1);

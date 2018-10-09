@@ -55,7 +55,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //禁用 csrf
         http.cors().and().csrf().disable().authorizeRequests()
                 //允许以下请求
-                .antMatchers("/login/**").permitAll()
+                .antMatchers("/login/**", "/user/getUser/*")
+                .permitAll()
                 // 所有请求需要身份认证
                 .anyRequest().authenticated()
                 .and()

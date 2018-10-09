@@ -8,7 +8,9 @@ target/
 # BlueJ files
 *.ctxt
 demo-*.iml
-
+/bin
+*/bin
+*/target/
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

@@ -1,4 +1,4 @@
-package cn.com.demo.user.uitl;
+package cn.com.demo.user.util;
 
 //import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.generator.AutoGenerator;

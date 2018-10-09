@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 @FeignClient(serviceId = "demo-user-service")
 public interface RemoteUserCallService {
+    /**
+     * 根据userCode 获取用户信息
+     * @param id
+     * @return
+     * @throws UsernameNotFoundException
+     */
     @GetMapping(value = "/user/getUser/{id}")
     ResponseBody getUser(@PathVariable("id") String id) throws UsernameNotFoundException;
 }
